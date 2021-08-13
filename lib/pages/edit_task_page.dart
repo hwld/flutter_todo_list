@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_todos/models/todoList.dart';
+import 'package:provider/provider.dart';
 
-class EditTaskPage extends StatelessWidget {
+class EditTaskPage extends StatefulWidget {
   const EditTaskPage({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _EditTaskPageState();
+  }
+}
+
+class _EditTaskPageState extends State<EditTaskPage> {
+  final titleController = TextEditingController();
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +29,14 @@ class EditTaskPage extends StatelessWidget {
       body: Center(
         child: Container(
           margin: EdgeInsets.all(30),
-          child: _TodoForm(),
+          child: _TodoForm(
+            titleController: titleController,
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          context.read<TodoList>().addTodo(titleController.text);
           Navigator.pop(context);
         },
         child: const Icon(
@@ -27,21 +47,25 @@ class EditTaskPage extends StatelessWidget {
   }
 }
 
-class _TodoForm extends StatefulWidget {
-  const _TodoForm({Key? key}) : super(key: key);
+class _TodoForm extends StatelessWidget {
+  const _TodoForm({
+    required this.titleController,
+    Key? key,
+  }) : super(key: key);
+  final TextEditingController titleController;
 
-  @override
-  _TodoFormState createState() => _TodoFormState();
-}
-
-class _TodoFormState extends State<_TodoForm> {
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
         children: [
           TextFormField(
+            controller: titleController,
             decoration: const InputDecoration(hintText: 'Todo'),
+            onFieldSubmitted: (value) {
+              context.read<TodoList>().addTodo(value);
+              Navigator.pop(context);
+            },
           ),
         ],
       ),
