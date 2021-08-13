@@ -30,19 +30,33 @@ class TasksPage extends StatelessWidget {
         ],
       ),
       body: Consumer<TodoList>(
-        builder: (context, todos, child) => ListView(
-          padding: EdgeInsets.only(
-            top: 20,
-            right: 20,
-            left: 20,
-            bottom: 80,
-          ),
-          children: todos.items
-              .map(
-                (todo) => _Task(todo: todo),
-              )
-              .toList(),
-        ),
+        builder: (context, todos, child) {
+          return FutureBuilder<List<Todo>>(
+            future: todos.items,
+            builder: (context, snapshot) {
+              List<Widget> children = [];
+
+              if (snapshot.hasData) {
+                children =
+                    snapshot.data!.map((todo) => _Task(todo: todo)).toList();
+              } else if (snapshot.hasError) {
+                children = [
+                  const Text('データを読み込むことができませんでした。'),
+                ];
+              }
+
+              return ListView(
+                padding: EdgeInsets.only(
+                  top: 20,
+                  right: 20,
+                  left: 20,
+                  bottom: 80,
+                ),
+                children: children,
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -75,8 +89,10 @@ class _Task extends StatelessWidget {
             children: [
               Checkbox(
                 value: todo.isComplete,
-                onChanged: (value) {
-                  context.read<TodoList>().updateTodo(todo.id, value ?? false);
+                onChanged: (value) async {
+                  await context
+                      .read<TodoList>()
+                      .updateTodo(todo.id, value ?? false);
                 },
               ),
               Expanded(
@@ -91,8 +107,8 @@ class _Task extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: () {
-                  context.read<TodoList>().removeTodo(todo.id);
+                onPressed: () async {
+                  await context.read<TodoList>().removeTodo(todo.id);
                 },
                 icon: const Icon(
                   Icons.delete,
