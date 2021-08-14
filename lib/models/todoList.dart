@@ -14,7 +14,6 @@ class TodoList extends ChangeNotifier {
   Future<List<Todo>> get items async {
     if (_items.length == 0) {
       _items = await todoRepository.todos();
-      print(_items);
     }
     return _items;
   }

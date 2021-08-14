@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class TodoRepository {
   TodoRepository({required String dbPath}) {
-    this.database = openDatabase(
+    this._database = openDatabase(
       join(dbPath, 'todo_database.db'),
       onCreate: (db, version) {
         return db.execute(
@@ -15,45 +15,79 @@ class TodoRepository {
     );
   }
 
-  late Future<Database> database;
+  late Future<Database> _database;
+
+  // todoMapをDB用のmapに変換する
+  Map<String, dynamic> convertToDBTodoMap(Map<String, dynamic> todoMap) {
+    return todoMap.map((key, value) {
+      if (key == 'isComplete') {
+        if (value == true) {
+          return MapEntry(key, 1);
+        } else if (value == false) {
+          return MapEntry(key, 0);
+        } else {
+          throw Error();
+        }
+      }
+      return MapEntry(key, value);
+    });
+  }
+
+  Map<String, dynamic> convertToTodoMap(Map<String, dynamic> todoMap) {
+    return todoMap.map((key, value) {
+      if (key == 'isComplete') {
+        if (value == 1) {
+          return MapEntry(key, true);
+        } else if (value == 0) {
+          return MapEntry(key, false);
+        } else {
+          throw Error();
+        }
+      }
+      return MapEntry(key, value);
+    });
+  }
 
   Future<void> insertTodo(Todo todo) async {
-    final db = await database;
+    final db = await _database;
+    final todoMap = convertToDBTodoMap(todo.toMap());
 
     await db.insert(
       'todos',
-      todo.toMap(),
+      todoMap,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   Future<List<Todo>> todos() async {
-    final db = await database;
+    final db = await _database;
 
     final List<Map<String, dynamic>> maps = await db.query('todos');
 
     return List.generate(maps.length, (i) {
+      final dbTodoMap = convertToTodoMap(maps[i]);
       return Todo(
-        id: maps[i]['id'],
-        title: maps[i]['title'],
-        isComplete: maps[i]['isComplete'] == 1 ? true : false,
+        id: dbTodoMap['id'],
+        title: dbTodoMap['title'],
+        isComplete: dbTodoMap['isComplete'],
       );
     });
   }
 
   Future<void> updateTodo(Todo todo) async {
-    final db = await database;
+    final db = await _database;
+    final todoMap = convertToDBTodoMap(todo.toMap());
 
     await db.update(
       'todos',
-      todo.toMap(),
+      todoMap,
       where: 'id = ?',
       whereArgs: [todo.id],
     );
   }
 
   Future<void> deleteTodo(String id) async {
-    final db = await database;
+    final db = await _database;
 
     await db.delete(
       'todos',
