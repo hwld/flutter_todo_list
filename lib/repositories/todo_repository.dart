@@ -18,7 +18,7 @@ class TodoRepository {
   late Future<Database> _database;
 
   // todoMapをDB用のmapに変換する
-  Map<String, dynamic> convertToDBTodoMap(Map<String, dynamic> todoMap) {
+  Map<String, dynamic> _convertToDBTodoMap(Map<String, dynamic> todoMap) {
     return todoMap.map((key, value) {
       if (key == 'isComplete') {
         if (value == true) {
@@ -33,7 +33,7 @@ class TodoRepository {
     });
   }
 
-  Map<String, dynamic> convertToTodoMap(Map<String, dynamic> todoMap) {
+  Map<String, dynamic> _convertToTodoMap(Map<String, dynamic> todoMap) {
     return todoMap.map((key, value) {
       if (key == 'isComplete') {
         if (value == 1) {
@@ -50,7 +50,7 @@ class TodoRepository {
 
   Future<void> insertTodo(Todo todo) async {
     final db = await _database;
-    final todoMap = convertToDBTodoMap(todo.toMap());
+    final todoMap = _convertToDBTodoMap(todo.toMap());
 
     await db.insert(
       'todos',
@@ -65,7 +65,7 @@ class TodoRepository {
     final List<Map<String, dynamic>> maps = await db.query('todos');
 
     return List.generate(maps.length, (i) {
-      final dbTodoMap = convertToTodoMap(maps[i]);
+      final dbTodoMap = _convertToTodoMap(maps[i]);
       return Todo(
         id: dbTodoMap['id'],
         title: dbTodoMap['title'],
@@ -76,7 +76,7 @@ class TodoRepository {
 
   Future<void> updateTodo(Todo todo) async {
     final db = await _database;
-    final todoMap = convertToDBTodoMap(todo.toMap());
+    final todoMap = _convertToDBTodoMap(todo.toMap());
 
     await db.update(
       'todos',

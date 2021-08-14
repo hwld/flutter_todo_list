@@ -3,10 +3,27 @@ import 'package:flutter_todo_list/models/todo.dart';
 import 'package:flutter_todo_list/models/todoList.dart';
 import 'package:provider/provider.dart';
 
-class TasksPage extends StatelessWidget {
+enum SortOrder { ascByName, ascByDate }
+
+class TasksPage extends StatefulWidget {
   const TasksPage({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _TasksPageState();
+  }
+}
+
+class _TasksPageState extends State<TasksPage> {
+  SortOrder sortOrder = SortOrder.ascByDate;
+
+  void changeSortOrder(SortOrder order) {
+    setState(() {
+      sortOrder = order;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +37,43 @@ class TasksPage extends StatelessWidget {
               icon: const Icon(Icons.search),
             ),
           ),
-          IconButton(
-            onPressed: () {},
+          PopupMenuButton(
             icon: const Icon(Icons.sort),
+            onSelected: (SortOrder order) {
+              changeSortOrder(order);
+            },
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  value: SortOrder.ascByName,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('名前順'),
+                      if (sortOrder == SortOrder.ascByName)
+                        const Icon(
+                          Icons.check,
+                          color: Colors.black,
+                        ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: SortOrder.ascByDate,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('作成順'),
+                      if (sortOrder == SortOrder.ascByDate)
+                        const Icon(
+                          Icons.check,
+                          color: Colors.black,
+                        ),
+                    ],
+                  ),
+                )
+              ];
+            },
           ),
           IconButton(
             onPressed: () {},
@@ -30,34 +81,8 @@ class TasksPage extends StatelessWidget {
           )
         ],
       ),
-      body: Consumer<TodoList>(
-        builder: (context, todos, child) {
-          return FutureBuilder<List<Todo>>(
-            future: todos.items,
-            builder: (context, snapshot) {
-              List<Widget> children = [];
-
-              if (snapshot.hasData) {
-                children =
-                    snapshot.data!.map((todo) => _Task(todo: todo)).toList();
-              } else if (snapshot.hasError) {
-                children = [
-                  const Text('データを読み込むことができませんでした。'),
-                ];
-              }
-
-              return ListView(
-                padding: EdgeInsets.only(
-                  top: 20,
-                  right: 20,
-                  left: 20,
-                  bottom: 80,
-                ),
-                children: children,
-              );
-            },
-          );
-        },
+      body: _TaskList(
+        sortOrder: sortOrder,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -65,6 +90,41 @@ class TasksPage extends StatelessWidget {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+}
+
+class _TaskList extends StatelessWidget {
+  _TaskList({
+    required this.sortOrder,
+    Key? key,
+  }) : super(key: key);
+
+  final SortOrder sortOrder;
+
+  @override
+  Widget build(BuildContext context) {
+    final todos = [...context.watch<TodoList>().items];
+    todos.sort((a, b) {
+      if (sortOrder == SortOrder.ascByDate) {
+        return 0;
+      } else if (sortOrder == SortOrder.ascByName) {
+        return a.title.compareTo(b.title);
+      }
+      return 0;
+    });
+
+    return ListView.builder(
+      padding: EdgeInsets.only(
+        top: 20,
+        right: 20,
+        left: 20,
+        bottom: 80,
+      ),
+      itemCount: todos.length,
+      itemBuilder: (context, index) {
+        return _Task(todo: todos[index]);
+      },
     );
   }
 }

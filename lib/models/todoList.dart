@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_todo_list/models/todo.dart';
 import 'package:flutter_todo_list/repositories/todo_repository.dart';
@@ -8,14 +10,14 @@ class TodoList extends ChangeNotifier {
     required this.todoRepository,
   });
 
-  List<Todo> _items = [];
   final TodoRepository todoRepository;
 
-  Future<List<Todo>> get items async {
-    if (_items.length == 0) {
-      _items = await todoRepository.todos();
-    }
-    return _items;
+  List<Todo> _items = [];
+
+  UnmodifiableListView<Todo> get items => UnmodifiableListView(_items);
+
+  Future loadTodos() async {
+    _items.addAll(await todoRepository.todos());
   }
 
   Future<void> addTodo(String title) async {
