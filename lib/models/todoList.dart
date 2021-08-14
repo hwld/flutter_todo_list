@@ -1,30 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_todos/repositories/todo_repository.dart';
+import 'package:flutter_todo_list/models/todo.dart';
+import 'package:flutter_todo_list/repositories/todo_repository.dart';
 import 'package:uuid/uuid.dart';
-
-class Todo {
-  String id;
-  String title;
-  bool isComplete;
-
-  Todo({
-    required this.id,
-    required this.title,
-    required this.isComplete,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'isComplete': isComplete,
-    };
-  }
-
-  String toStrign() {
-    return 'Todo{id: $id, title: $title, isComplete: $isComplete}';
-  }
-}
 
 class TodoList extends ChangeNotifier {
   TodoList({

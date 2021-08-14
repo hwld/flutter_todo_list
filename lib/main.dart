@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_todos/models/todoList.dart';
-import 'package:flutter_todos/pages/edit_task_page.dart';
-import 'package:flutter_todos/pages/tasks_page.dart';
-import 'package:flutter_todos/repositories/todo_repository.dart';
+import 'package:flutter_todo_list/models/todoList.dart';
+import 'package:flutter_todo_list/pages/edit_task_page.dart';
+import 'package:flutter_todo_list/pages/tasks_page.dart';
+import 'package:flutter_todo_list/repositories/todo_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -10,7 +10,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final dbPath = await getDatabasesPath();
-  print(dbPath);
 
   runApp(TodoApp(
     dbPath: dbPath,
