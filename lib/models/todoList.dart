@@ -18,6 +18,7 @@ class TodoList extends ChangeNotifier {
 
   Future loadTodos() async {
     _items.addAll(await todoRepository.todos());
+    notifyListeners();
   }
 
   Future<void> addTodo(String title) async {

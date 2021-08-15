@@ -35,8 +35,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await context.read<TodoList>().addTodo(titleController.text);
+        onPressed: () {
+          context.read<TodoList>().addTodo(titleController.text);
           Navigator.pop(context);
         },
         child: const Icon(
@@ -62,8 +62,8 @@ class _TodoForm extends StatelessWidget {
           TextFormField(
             controller: titleController,
             decoration: const InputDecoration(hintText: 'Todo'),
-            onFieldSubmitted: (value) async {
-              await context.read<TodoList>().addTodo(value);
+            onFieldSubmitted: (value) {
+              context.read<TodoList>().addTodo(value);
               Navigator.pop(context);
             },
           ),

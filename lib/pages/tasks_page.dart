@@ -3,7 +3,8 @@ import 'package:flutter_todo_list/models/todo.dart';
 import 'package:flutter_todo_list/models/todoList.dart';
 import 'package:provider/provider.dart';
 
-enum SortOrder { ascByName, ascByDate }
+enum TodoSortOrder { ascByName, ascByDate }
+enum TodoFilter { all, active, completed }
 
 class TasksPage extends StatefulWidget {
   const TasksPage({
@@ -17,11 +18,18 @@ class TasksPage extends StatefulWidget {
 }
 
 class _TasksPageState extends State<TasksPage> {
-  SortOrder sortOrder = SortOrder.ascByDate;
+  TodoSortOrder _todoSortOrder = TodoSortOrder.ascByDate;
+  TodoFilter _todoFilter = TodoFilter.all;
 
-  void changeSortOrder(SortOrder order) {
+  void changeSortOrder(TodoSortOrder order) {
     setState(() {
-      sortOrder = order;
+      _todoSortOrder = order;
+    });
+  }
+
+  void changeTodoFilter(TodoFilter filter) {
+    setState(() {
+      _todoFilter = filter;
     });
   }
 
@@ -38,19 +46,20 @@ class _TasksPageState extends State<TasksPage> {
             ),
           ),
           PopupMenuButton(
+            tooltip: '並び順',
             icon: const Icon(Icons.sort),
-            onSelected: (SortOrder order) {
+            onSelected: (TodoSortOrder order) {
               changeSortOrder(order);
             },
             itemBuilder: (context) {
               return [
                 PopupMenuItem(
-                  value: SortOrder.ascByName,
+                  value: TodoSortOrder.ascByName,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('名前順'),
-                      if (sortOrder == SortOrder.ascByName)
+                      if (_todoSortOrder == TodoSortOrder.ascByName)
                         const Icon(
                           Icons.check,
                           color: Colors.black,
@@ -59,12 +68,12 @@ class _TasksPageState extends State<TasksPage> {
                   ),
                 ),
                 PopupMenuItem(
-                  value: SortOrder.ascByDate,
+                  value: TodoSortOrder.ascByDate,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('作成順'),
-                      if (sortOrder == SortOrder.ascByDate)
+                      if (_todoSortOrder == TodoSortOrder.ascByDate)
                         const Icon(
                           Icons.check,
                           color: Colors.black,
@@ -75,14 +84,63 @@ class _TasksPageState extends State<TasksPage> {
               ];
             },
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert),
-          )
+          PopupMenuButton(
+              tooltip: '絞り込み',
+              icon: const Icon(Icons.filter_alt),
+              onSelected: (TodoFilter filter) {
+                changeTodoFilter(filter);
+              },
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem(
+                    value: TodoFilter.all,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('全て'),
+                        if (_todoFilter == TodoFilter.all)
+                          const Icon(
+                            Icons.check,
+                            color: Colors.black,
+                          ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: TodoFilter.active,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('未完了'),
+                        if (_todoFilter == TodoFilter.active)
+                          const Icon(
+                            Icons.check,
+                            color: Colors.black,
+                          ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: TodoFilter.completed,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('完了'),
+                        if (_todoFilter == TodoFilter.completed)
+                          const Icon(
+                            Icons.check,
+                            color: Colors.black,
+                          ),
+                      ],
+                    ),
+                  ),
+                ];
+              }),
         ],
       ),
       body: _TaskList(
-        sortOrder: sortOrder,
+        sortOrder: _todoSortOrder,
+        filter: _todoFilter,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -97,18 +155,28 @@ class _TasksPageState extends State<TasksPage> {
 class _TaskList extends StatelessWidget {
   _TaskList({
     required this.sortOrder,
+    required this.filter,
     Key? key,
   }) : super(key: key);
 
-  final SortOrder sortOrder;
+  final TodoSortOrder sortOrder;
+  final TodoFilter filter;
 
   @override
   Widget build(BuildContext context) {
-    final todos = [...context.watch<TodoList>().items];
+    final todos = context.watch<TodoList>().items.where((todo) {
+      if (filter == TodoFilter.active) {
+        return todo.isComplete == false;
+      } else if (filter == TodoFilter.completed) {
+        return todo.isComplete == true;
+      }
+      return true;
+    }).toList();
+
     todos.sort((a, b) {
-      if (sortOrder == SortOrder.ascByDate) {
+      if (sortOrder == TodoSortOrder.ascByDate) {
         return 0;
-      } else if (sortOrder == SortOrder.ascByName) {
+      } else if (sortOrder == TodoSortOrder.ascByName) {
         return a.title.compareTo(b.title);
       }
       return 0;
@@ -139,47 +207,48 @@ class _Task extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: 30,
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(7),
-          child: Row(
-            children: [
-              Checkbox(
-                value: todo.isComplete,
-                onChanged: (value) async {
-                  await context
-                      .read<TodoList>()
-                      .updateTodo(todo.id, value ?? false);
-                },
-              ),
-              Expanded(
-                child: Text(
-                  '${todo.title}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    decoration: todo.isComplete
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
+    return Dismissible(
+      key: ValueKey<String>(todo.id),
+      child: Card(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: 30,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(7),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: todo.isComplete,
+                  onChanged: (value) {
+                    context
+                        .read<TodoList>()
+                        .updateTodo(todo.id, value ?? false);
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    '${todo.title}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: todo.isComplete
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                onPressed: () async {
-                  await context.read<TodoList>().removeTodo(todo.id);
-                },
-                icon: const Icon(
-                  Icons.delete,
-                  color: Colors.black54,
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.more_vert),
                 ),
-              )
-            ],
+              ],
+            ),
           ),
         ),
       ),
+      onDismissed: (direction) {
+        context.read<TodoList>().removeTodo(todo.id);
+      },
     );
   }
 }
