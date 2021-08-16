@@ -59,13 +59,9 @@ class _TodoForm extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          TextFormField(
+          TextField(
             controller: titleController,
             decoration: const InputDecoration(hintText: 'Todo'),
-            onFieldSubmitted: (value) {
-              context.read<TodoList>().addTodo(value);
-              Navigator.pop(context);
-            },
           ),
         ],
       ),

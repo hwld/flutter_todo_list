@@ -21,129 +21,94 @@ class _TasksPageState extends State<TasksPage> {
   TodoSortOrder _todoSortOrder = TodoSortOrder.ascByDate;
   TodoFilter _todoFilter = TodoFilter.all;
 
-  void changeSortOrder(TodoSortOrder order) {
+  String _searchText = "";
+  bool _isSearching = false;
+  TextEditingController _controller = TextEditingController();
+
+  void _changeSortOrder(TodoSortOrder order) {
     setState(() {
       _todoSortOrder = order;
     });
   }
 
-  void changeTodoFilter(TodoFilter filter) {
+  void _changeTodoFilter(TodoFilter filter) {
     setState(() {
       _todoFilter = filter;
     });
   }
 
+  void _changeIsSearching(bool isSearching) {
+    setState(() {
+      _isSearching = isSearching;
+    });
+  }
+
+  void _changeSearchText(String text) {
+    setState(() {
+      _searchText = text;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final _backButton = IconButton(
+      onPressed: () {
+        _changeIsSearching(false);
+      },
+      icon: const Icon(Icons.arrow_back),
+    );
+
+    final _searchButton = IconButton(
+      onPressed: () {
+        _changeIsSearching(true);
+      },
+      icon: const Icon(Icons.search),
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: _isSearching ? null : const Text('Tasks'),
         actions: [
-          Container(
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.search),
-            ),
-          ),
-          PopupMenuButton(
-            tooltip: '並び順',
-            icon: const Icon(Icons.sort),
-            onSelected: (TodoSortOrder order) {
-              changeSortOrder(order);
-            },
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  value: TodoSortOrder.ascByName,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('名前順'),
-                      if (_todoSortOrder == TodoSortOrder.ascByName)
-                        const Icon(
-                          Icons.check,
-                          color: Colors.black,
-                        ),
-                    ],
-                  ),
+          if (_isSearching) ...[
+            _backButton,
+            Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: _SearchBar(
+                  searchText: _searchText,
+                  onChangeSearchText: _changeSearchText,
+                  textEditingController: _controller,
                 ),
-                PopupMenuItem(
-                  value: TodoSortOrder.ascByDate,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('作成順'),
-                      if (_todoSortOrder == TodoSortOrder.ascByDate)
-                        const Icon(
-                          Icons.check,
-                          color: Colors.black,
-                        ),
-                    ],
-                  ),
-                )
-              ];
-            },
+              ),
+            )
+          ],
+          if (!_isSearching) _searchButton,
+          _SortButton(
+            currentOrder: _todoSortOrder,
+            onChangeSortOrder: _changeSortOrder,
           ),
-          PopupMenuButton(
-              tooltip: '絞り込み',
-              icon: const Icon(Icons.filter_alt),
-              onSelected: (TodoFilter filter) {
-                changeTodoFilter(filter);
-              },
-              itemBuilder: (context) {
-                return [
-                  PopupMenuItem(
-                    value: TodoFilter.all,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('全て'),
-                        if (_todoFilter == TodoFilter.all)
-                          const Icon(
-                            Icons.check,
-                            color: Colors.black,
-                          ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: TodoFilter.active,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('未完了'),
-                        if (_todoFilter == TodoFilter.active)
-                          const Icon(
-                            Icons.check,
-                            color: Colors.black,
-                          ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: TodoFilter.completed,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('完了'),
-                        if (_todoFilter == TodoFilter.completed)
-                          const Icon(
-                            Icons.check,
-                            color: Colors.black,
-                          ),
-                      ],
-                    ),
-                  ),
-                ];
-              }),
+          _FilterButton(
+            currentFilter: _todoFilter,
+            onChangeTodoFilter: _changeTodoFilter,
+          ),
         ],
       ),
       body: _TaskList(
         sortOrder: _todoSortOrder,
         filter: _todoFilter,
+        searchText: _searchText,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          _changeSearchText('');
+          _controller.clear();
+          _changeIsSearching(false);
           await Navigator.pushNamed(context, '/edit');
         },
         child: const Icon(Icons.add),
@@ -152,15 +117,184 @@ class _TasksPageState extends State<TasksPage> {
   }
 }
 
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({
+    required this.onChangeSearchText,
+    required this.searchText,
+    required this.textEditingController,
+    Key? key,
+  }) : super(key: key);
+
+  final String searchText;
+  final void Function(String text) onChangeSearchText;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: textEditingController,
+      onChanged: (value) {
+        onChangeSearchText(value);
+      },
+      cursorColor: Colors.white,
+      style: const TextStyle(
+        color: Colors.white,
+      ),
+      textAlignVertical: TextAlignVertical.center,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        filled: true,
+        fillColor: Colors.blue[400],
+        prefixIcon: const Icon(
+          Icons.search,
+          color: Colors.white,
+        ),
+        hintText: 'Search...',
+        hintStyle: const TextStyle(color: Colors.white70),
+        suffixIcon: searchText == ''
+            ? null
+            : Material(
+                type: MaterialType.transparency,
+                clipBehavior: Clip.antiAlias,
+                borderRadius: BorderRadius.circular(25),
+                child: IconButton(
+                  onPressed: () {
+                    onChangeSearchText('');
+                    textEditingController.clear();
+                  },
+                  icon: const Icon(
+                    Icons.clear,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _SortButton extends StatelessWidget {
+  _SortButton({
+    required this.currentOrder,
+    required this.onChangeSortOrder,
+    Key? key,
+  }) : super(key: key);
+
+  final TodoSortOrder currentOrder;
+  final void Function(TodoSortOrder order) onChangeSortOrder;
+
+  @override
+  Widget build(BuildContext context) {
+    const checkIcon = const Icon(
+      Icons.check,
+      color: Colors.black,
+    );
+
+    return PopupMenuButton(
+      tooltip: '並び順',
+      icon: const Icon(Icons.sort),
+      onSelected: (TodoSortOrder order) {
+        onChangeSortOrder(order);
+      },
+      itemBuilder: (context) {
+        return [
+          PopupMenuItem(
+            value: TodoSortOrder.ascByName,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('名前順'),
+                if (currentOrder == TodoSortOrder.ascByName) checkIcon
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: TodoSortOrder.ascByDate,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('作成順'),
+                if (currentOrder == TodoSortOrder.ascByDate) checkIcon
+              ],
+            ),
+          )
+        ];
+      },
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  _FilterButton({
+    required this.currentFilter,
+    required this.onChangeTodoFilter,
+    Key? key,
+  }) : super(key: key);
+
+  final TodoFilter currentFilter;
+  final void Function(TodoFilter filter) onChangeTodoFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    const checkIcon = const Icon(
+      Icons.check,
+      color: Colors.black,
+    );
+
+    return PopupMenuButton(
+        tooltip: '絞り込み',
+        icon: const Icon(Icons.filter_alt),
+        onSelected: (TodoFilter filter) {
+          onChangeTodoFilter(filter);
+        },
+        itemBuilder: (context) {
+          return [
+            PopupMenuItem(
+              value: TodoFilter.all,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('全て'),
+                  if (currentFilter == TodoFilter.all) checkIcon
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: TodoFilter.active,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('未完了'),
+                  if (currentFilter == TodoFilter.active) checkIcon
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: TodoFilter.completed,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('完了'),
+                  if (currentFilter == TodoFilter.completed) checkIcon
+                ],
+              ),
+            ),
+          ];
+        });
+  }
+}
+
 class _TaskList extends StatelessWidget {
   _TaskList({
     required this.sortOrder,
     required this.filter,
+    required this.searchText,
     Key? key,
   }) : super(key: key);
 
   final TodoSortOrder sortOrder;
   final TodoFilter filter;
+  final String searchText;
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +305,8 @@ class _TaskList extends StatelessWidget {
         return todo.isComplete == true;
       }
       return true;
+    }).where((todo) {
+      return todo.title.contains(searchText);
     }).toList();
 
     todos.sort((a, b) {
@@ -236,10 +372,6 @@ class _Task extends StatelessWidget {
                           : TextDecoration.none,
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.more_vert),
                 ),
               ],
             ),
