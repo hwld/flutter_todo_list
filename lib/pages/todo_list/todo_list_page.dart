@@ -62,28 +62,22 @@ class _TodoListPageState extends State<TodoListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final _backButton = IconButton(
-      key: UniqueKey(),
-      onPressed: () {
-        _changeIsSearching(false);
-      },
-      icon: const Icon(Icons.arrow_back),
-    );
-
-    final _searchButton = IconButton(
-      onPressed: () {
-        _changeIsSearching(true);
-      },
-      icon: const Icon(Icons.search),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: _isSearching ? null : const Text('TodoList'),
         actions: [
           if (_isSearching) ...[
-            _backButton,
+            IconButton(
+              key: UniqueKey(),
+              onPressed: () {
+                _changeIsSearching(false);
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
             Expanded(
+              // ここにkeyを指定しないと入力されて再ビルドが起こる度にフォーカスが外れる？
+              // SearchBarが再ビルドの度に別のWidgetだと判断されてる？
+              key: ValueKey('searchBar'),
               child: Align(
                 alignment: Alignment.center,
                 child: SearchBar(
@@ -94,7 +88,13 @@ class _TodoListPageState extends State<TodoListPage> {
               ),
             )
           ],
-          if (!_isSearching) _searchButton,
+          if (!_isSearching)
+            IconButton(
+              onPressed: () {
+                _changeIsSearching(true);
+              },
+              icon: const Icon(Icons.search),
+            ),
           SortButton(
             key: UniqueKey(),
             currentOrder: _todoSortOrder,
