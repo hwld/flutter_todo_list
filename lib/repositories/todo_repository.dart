@@ -1,4 +1,4 @@
-import 'package:flutter_todo_list/models/todo.dart';
+import 'package:flutter_todo_list/models/todo_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -48,7 +48,7 @@ class TodoRepository {
     });
   }
 
-  Future<void> insertTodo(Todo todo) async {
+  Future<void> insertTodo(TodoModel todo) async {
     final db = await _database;
     final todoMap = _convertToDBTodoMap(todo.toMap());
 
@@ -59,14 +59,14 @@ class TodoRepository {
     );
   }
 
-  Future<List<Todo>> todos() async {
+  Future<List<TodoModel>> todos() async {
     final db = await _database;
 
     final List<Map<String, dynamic>> maps = await db.query('todos');
 
     return List.generate(maps.length, (i) {
       final dbTodoMap = _convertToTodoMap(maps[i]);
-      return Todo(
+      return TodoModel(
         id: dbTodoMap['id'],
         title: dbTodoMap['title'],
         isComplete: dbTodoMap['isComplete'],
@@ -74,7 +74,7 @@ class TodoRepository {
     });
   }
 
-  Future<void> updateTodo(Todo todo) async {
+  Future<void> updateTodo(TodoModel todo) async {
     final db = await _database;
     final todoMap = _convertToDBTodoMap(todo.toMap());
 

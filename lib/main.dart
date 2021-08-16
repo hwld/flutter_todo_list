@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_todo_list/models/todoList.dart';
-import 'package:flutter_todo_list/pages/edit_task_page.dart';
-import 'package:flutter_todo_list/pages/tasks_page.dart';
+import 'package:flutter_todo_list/models/todo_list_model.dart';
+import 'package:flutter_todo_list/pages/todo_editor/todo_editor_page.dart';
+import 'package:flutter_todo_list/pages/todo_list/todo_list_page.dart';
 import 'package:flutter_todo_list/repositories/todo_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -26,17 +26,17 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<TodoList>(
+    return ChangeNotifierProvider<TodoListModel>(
       create: (context) {
-        return TodoList(
+        return TodoListModel(
           todoRepository: TodoRepository(dbPath: dbPath),
         )..loadTodos();
       },
       child: MaterialApp(
-        initialRoute: '/',
+        initialRoute: TodoListPage.route,
         routes: {
-          '/': (context) => const TasksPage(),
-          '/edit': (context) => const EditTaskPage(),
+          TodoListPage.route: (context) => const TodoListPage(),
+          TodoEditorPage.route: (context) => const TodoEditorPage(),
         },
       ),
     );
