@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 class TodoEditorPage extends StatefulWidget {
   const TodoEditorPage({Key? key}) : super(key: key);
 
-  static final route = '/editor';
+  static const route = '/editor';
 
   @override
   State<StatefulWidget> createState() {
@@ -27,11 +27,11 @@ class _TodoEditorPageState extends State<TodoEditorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Todo'),
+        title: const Text('Edit Todo'),
       ),
       body: Center(
         child: Container(
-          margin: EdgeInsets.all(30),
+          margin: const EdgeInsets.all(30),
           child: TodoForm(
             titleController: titleController,
           ),

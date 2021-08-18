@@ -6,7 +6,7 @@ import 'package:flutter_todo_list/repositories/todo_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final dbPath = await getDatabasesPath();

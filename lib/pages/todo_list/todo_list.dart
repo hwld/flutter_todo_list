@@ -5,7 +5,7 @@ import 'package:flutter_todo_list/pages/todo_list/todo_list_page.dart';
 import 'package:provider/provider.dart';
 
 class TodoList extends StatelessWidget {
-  TodoList({
+  const TodoList({
     required this.sortOrder,
     required this.filter,
     required this.searchText,
@@ -39,7 +39,7 @@ class TodoList extends StatelessWidget {
     });
 
     return ListView.builder(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 20,
         right: 20,
         left: 20,
@@ -67,11 +67,11 @@ class _TodoItem extends StatelessWidget {
       key: ValueKey<String>(todo.id),
       child: Card(
         child: ConstrainedBox(
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             minHeight: 30,
           ),
           child: Padding(
-            padding: EdgeInsets.all(7),
+            padding: const EdgeInsets.all(7),
             child: Row(
               children: [
                 Checkbox(
@@ -84,7 +84,7 @@ class _TodoItem extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    '${todo.title}',
+                    todo.title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       decoration: todo.isComplete

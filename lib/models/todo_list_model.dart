@@ -12,7 +12,7 @@ class TodoListModel extends ChangeNotifier {
 
   final TodoRepository todoRepository;
 
-  List<TodoModel> _items = [];
+  final List<TodoModel> _items = [];
 
   UnmodifiableListView<TodoModel> get items => UnmodifiableListView(_items);
 
@@ -23,7 +23,7 @@ class TodoListModel extends ChangeNotifier {
 
   Future<void> addTodo(String title) async {
     final todo = TodoModel(
-      id: Uuid().v4(),
+      id: const Uuid().v4(),
       title: title,
       isComplete: false,
     );

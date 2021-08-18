@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class TodoRepository {
   TodoRepository({required String dbPath}) {
-    this._database = openDatabase(
+    _database = openDatabase(
       join(dbPath, 'todo_database.db'),
       onCreate: (db, version) {
         return db.execute(
@@ -18,32 +18,42 @@ class TodoRepository {
   late Future<Database> _database;
 
   // todoMapをDB用のmapに変換する
-  Map<String, dynamic> _convertToDBTodoMap(Map<String, dynamic> todoMap) {
+  Map<String, Object> _convertToDBTodoMap(Map<String, Object?> todoMap) {
     return todoMap.map((key, value) {
+      if (value == null) {
+        throw Exception();
+      }
+
       if (key == 'isComplete') {
         if (value == true) {
           return MapEntry(key, 1);
         } else if (value == false) {
           return MapEntry(key, 0);
         } else {
-          throw Error();
+          throw Exception();
         }
       }
+
       return MapEntry(key, value);
     });
   }
 
-  Map<String, dynamic> _convertToTodoMap(Map<String, dynamic> todoMap) {
+  Map<String, Object> _convertToTodoMap(Map<String, Object?> todoMap) {
     return todoMap.map((key, value) {
+      if (value == null) {
+        throw Exception();
+      }
+
       if (key == 'isComplete') {
         if (value == 1) {
           return MapEntry(key, true);
         } else if (value == 0) {
           return MapEntry(key, false);
         } else {
-          throw Error();
+          throw Exception();
         }
       }
+
       return MapEntry(key, value);
     });
   }
@@ -62,14 +72,23 @@ class TodoRepository {
   Future<List<TodoModel>> todos() async {
     final db = await _database;
 
-    final List<Map<String, dynamic>> maps = await db.query('todos');
+    final maps = await db.query('todos');
 
     return List.generate(maps.length, (i) {
       final dbTodoMap = _convertToTodoMap(maps[i]);
+
+      final dbId = dbTodoMap['id'];
+      final dbTitle = dbTodoMap['title'];
+      final dbIsComplete = dbTodoMap['isComplete'];
+
+      if (dbId is! String || dbTitle is! String || dbIsComplete is! bool) {
+        throw Exception();
+      }
+
       return TodoModel(
-        id: dbTodoMap['id'],
-        title: dbTodoMap['title'],
-        isComplete: dbTodoMap['isComplete'],
+        id: dbId,
+        title: dbTitle,
+        isComplete: dbIsComplete,
       );
     });
   }

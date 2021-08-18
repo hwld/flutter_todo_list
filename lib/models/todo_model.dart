@@ -9,7 +9,7 @@ class TodoModel {
     required this.isComplete,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, Object> toMap() {
     return {
       'id': id,
       'title': title,

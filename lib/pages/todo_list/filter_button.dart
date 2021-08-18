@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_todo_list/pages/todo_list/todo_list_page.dart';
 
 class FilterButton extends StatelessWidget {
-  FilterButton({
+  const FilterButton({
     required this.currentFilter,
     required this.onChangeTodoFilter,
     Key? key,
@@ -13,7 +13,7 @@ class FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const checkIcon = const Icon(
+    const checkIcon = Icon(
       Icons.check,
       color: Colors.black,
     );
@@ -21,8 +21,10 @@ class FilterButton extends StatelessWidget {
     return PopupMenuButton(
         tooltip: '絞り込み',
         icon: const Icon(Icons.filter_alt),
-        onSelected: (TodoFilter filter) {
-          onChangeTodoFilter(filter);
+        onSelected: (filter) {
+          if (filter is TodoFilter) {
+            onChangeTodoFilter(filter);
+          }
         },
         itemBuilder: (context) {
           return [
@@ -31,7 +33,7 @@ class FilterButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('全て'),
+                  const Text('全て'),
                   if (currentFilter == TodoFilter.all) checkIcon
                 ],
               ),
@@ -41,7 +43,7 @@ class FilterButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('未完了'),
+                  const Text('未完了'),
                   if (currentFilter == TodoFilter.active) checkIcon
                 ],
               ),
@@ -51,7 +53,7 @@ class FilterButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('完了'),
+                  const Text('完了'),
                   if (currentFilter == TodoFilter.completed) checkIcon
                 ],
               ),

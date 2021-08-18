@@ -14,7 +14,7 @@ class TodoListPage extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  static final route = '/';
+  static const route = '/';
 
   @override
   State<StatefulWidget> createState() {
@@ -28,7 +28,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
   String _searchText = "";
   bool _isSearching = false;
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   void _changeSortOrder(TodoSortOrder order) {
     setState(() {
@@ -77,7 +77,7 @@ class _TodoListPageState extends State<TodoListPage> {
             Expanded(
               // ここにkeyを指定しないと入力されて再ビルドが起こる度にフォーカスが外れる？
               // SearchBarが再ビルドの度に別のWidgetだと判断されてる？
-              key: ValueKey('searchBar'),
+              key: const ValueKey('searchBar'),
               child: Align(
                 alignment: Alignment.center,
                 child: SearchBar(

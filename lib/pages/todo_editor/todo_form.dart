@@ -10,15 +10,13 @@ class TodoForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          TextField(
-            controller: titleController,
-            decoration: const InputDecoration(hintText: 'Todo'),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        TextField(
+          controller: titleController,
+          decoration: const InputDecoration(hintText: 'Todo'),
+        ),
+      ],
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_todo_list/pages/todo_list/todo_list_page.dart';
 
 class SortButton extends StatelessWidget {
-  SortButton({
+  const SortButton({
     required this.currentOrder,
     required this.onChangeSortOrder,
     Key? key,
@@ -13,7 +13,7 @@ class SortButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const checkIcon = const Icon(
+    const checkIcon = Icon(
       Icons.check,
       color: Colors.black,
     );
@@ -21,8 +21,10 @@ class SortButton extends StatelessWidget {
     return PopupMenuButton(
       tooltip: '並び順',
       icon: const Icon(Icons.sort),
-      onSelected: (TodoSortOrder order) {
-        onChangeSortOrder(order);
+      onSelected: (order) {
+        if (order is TodoSortOrder) {
+          onChangeSortOrder(order);
+        }
       },
       itemBuilder: (context) {
         return [
