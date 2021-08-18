@@ -3,6 +3,7 @@ import 'package:flutter_todo_list/models/todo_list_model.dart';
 import 'package:flutter_todo_list/models/todo_model.dart';
 import 'package:flutter_todo_list/pages/todo_list/todo_list_page.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class TodoList extends StatelessWidget {
   const TodoList({
@@ -61,10 +62,57 @@ class _TodoItem extends StatelessWidget {
 
   final TodoModel todo;
 
+  Future<void> _handleUpdateTodo(BuildContext context, bool? isComplete) async {
+    if (isComplete == null) {
+      return;
+    }
+    try {
+      await context.read<TodoListModel>().updateTodo(todo.id, isComplete);
+    } on DatabaseException {
+      showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('データベースエラー'),
+          content: const Text('データベースでエラーが発生しました。'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleRemoveTodo(BuildContext context, String id) async {
+    try {
+      await context.read<TodoListModel>().removeTodo(todo.id);
+    } on DatabaseException {
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('データベースエラー'),
+          content: const Text('データベースでエラーが発生しました。'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: ValueKey<String>(todo.id),
+      key: ValueKey<TodoModel>(todo),
       child: Card(
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -76,11 +124,7 @@ class _TodoItem extends StatelessWidget {
               children: [
                 Checkbox(
                   value: todo.isComplete,
-                  onChanged: (value) {
-                    context
-                        .read<TodoListModel>()
-                        .updateTodo(todo.id, value ?? false);
-                  },
+                  onChanged: (value) => _handleUpdateTodo(context, value),
                 ),
                 Expanded(
                   child: Text(
@@ -98,8 +142,8 @@ class _TodoItem extends StatelessWidget {
           ),
         ),
       ),
-      onDismissed: (direction) {
-        context.read<TodoListModel>().removeTodo(todo.id);
+      onDismissed: (_) {
+        _handleRemoveTodo(context, todo.id);
       },
     );
   }

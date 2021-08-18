@@ -69,10 +69,12 @@ class TodoRepository {
     );
   }
 
+  // TODO
+  // エラーハンドリング
   Future<List<TodoModel>> todos() async {
     final db = await _database;
 
-    final maps = await db.query('todos');
+    final maps = await db.query('todos___________');
 
     return List.generate(maps.length, (i) {
       final dbTodoMap = _convertToTodoMap(maps[i]);
