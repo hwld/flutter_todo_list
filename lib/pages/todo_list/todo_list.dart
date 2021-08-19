@@ -144,6 +144,24 @@ class _TodoItem extends StatelessWidget {
           ),
         ),
       ),
+      confirmDismiss: (_) async {
+        final status = await ScaffoldMessenger.of(context)
+            .showSnackBar(
+              SnackBar(
+                content: const Text('Todoを削除しました'),
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: 'もとに戻す',
+                  onPressed: () {},
+                ),
+              ),
+            )
+            .closed;
+        if (status == SnackBarClosedReason.action) {
+          return false;
+        }
+        return true;
+      },
       onDismissed: (_) {
         _handleRemoveTodo(context, todo.id);
       },
