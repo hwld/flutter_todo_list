@@ -69,8 +69,6 @@ class TodoRepository {
     );
   }
 
-  // TODO
-  // エラーハンドリング
   Future<List<TodoModel>> todos() async {
     final db = await _database;
 
