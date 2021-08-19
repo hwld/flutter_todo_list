@@ -74,7 +74,7 @@ class TodoRepository {
   Future<List<TodoModel>> todos() async {
     final db = await _database;
 
-    final maps = await db.query('todos___________');
+    final maps = await db.query('todos');
 
     return List.generate(maps.length, (i) {
       final dbTodoMap = _convertToTodoMap(maps[i]);

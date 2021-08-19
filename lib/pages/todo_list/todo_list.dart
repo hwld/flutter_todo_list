@@ -19,7 +19,9 @@ class TodoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todos = context.watch<TodoListModel>().items.where((todo) {
+    final listModel = context.watch<TodoListModel>();
+
+    final todos = listModel.items.where((todo) {
       if (filter == TodoFilter.active) {
         return todo.isComplete == false;
       } else if (filter == TodoFilter.completed) {

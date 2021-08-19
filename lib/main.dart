@@ -27,11 +27,9 @@ class TodoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TodoListModel>(
-      create: (context) {
-        return TodoListModel(
-          todoRepository: TodoRepository(dbPath: dbPath),
-        )..loadTodos();
-      },
+      create: (context) => TodoListModel(
+        todoRepository: TodoRepository(dbPath: dbPath),
+      )..loadTodos(),
       child: MaterialApp(
         initialRoute: TodoListPage.route,
         routes: {

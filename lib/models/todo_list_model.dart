@@ -12,13 +12,29 @@ class TodoListModel extends ChangeNotifier {
   });
 
   final TodoRepository todoRepository;
-
   final List<TodoModel> _items = [];
+  bool isLoading = false;
+  bool isLoadingError = false;
 
   UnmodifiableListView<TodoModel> get items => UnmodifiableListView(_items);
 
-  Future loadTodos() async {
-    _items.addAll(await todoRepository.todos());
+  Future<void> loadTodos() async {
+    List<TodoModel> list;
+    isLoading = true;
+    isLoadingError = false;
+    notifyListeners();
+
+    try {
+      list = await todoRepository.todos();
+    } on DatabaseException {
+      isLoadingError = true;
+      notifyListeners();
+      return;
+    } finally {
+      isLoading = false;
+    }
+
+    _items.addAll(list);
     notifyListeners();
   }
 
