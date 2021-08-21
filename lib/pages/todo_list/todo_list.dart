@@ -151,6 +151,7 @@ class _TodoItem extends StatelessWidget {
                 content: const Text('Todoを削除しました'),
                 behavior: SnackBarBehavior.floating,
                 action: SnackBarAction(
+                  textColor: Colors.blue,
                   label: 'もとに戻す',
                   onPressed: () {},
                 ),

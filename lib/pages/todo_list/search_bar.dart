@@ -19,21 +19,14 @@ class SearchBar extends StatelessWidget {
       onChanged: (value) {
         onChangeSearchText(value);
       },
-      cursorColor: Colors.white,
-      style: const TextStyle(
-        color: Colors.white,
-      ),
       textAlignVertical: TextAlignVertical.center,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         filled: true,
-        fillColor: Colors.blue[400],
         prefixIcon: const Icon(
           Icons.search,
-          color: Colors.white,
         ),
         hintText: 'Search...',
-        hintStyle: const TextStyle(color: Colors.white70),
         suffixIcon: searchText == ''
             ? null
             : Material(
@@ -47,7 +40,6 @@ class SearchBar extends StatelessWidget {
                   },
                   icon: const Icon(
                     Icons.clear,
-                    color: Colors.white,
                   ),
                 ),
               ),

@@ -186,14 +186,16 @@ class _AddTodoButton extends StatelessWidget {
     final disabled = model.isLoadingError || model.isLoading;
 
     return FloatingActionButton(
-      backgroundColor: disabled ? Colors.grey : null,
+      backgroundColor: disabled ? Theme.of(context).disabledColor : null,
       onPressed: disabled
           ? null
           : () async {
               leaveSearchMode();
               await Navigator.pushNamed(context, TodoEditorPage.route);
             },
-      child: const Icon(Icons.add),
+      child: const Icon(
+        Icons.add,
+      ),
     );
   }
 }

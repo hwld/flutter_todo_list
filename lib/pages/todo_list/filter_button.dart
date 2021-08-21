@@ -15,7 +15,6 @@ class FilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     const checkIcon = Icon(
       Icons.check,
-      color: Colors.black,
     );
 
     return PopupMenuButton(

@@ -26,11 +26,24 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkTheme = ThemeData.dark();
+
     return ChangeNotifierProvider<TodoListModel>(
       create: (context) => TodoListModel(
         todoRepository: TodoRepository(dbPath: dbPath),
       )..loadTodos(),
       child: MaterialApp(
+        theme: darkTheme.copyWith(
+          colorScheme: darkTheme.colorScheme.copyWith(
+            secondary: Colors.blue,
+          ),
+          toggleableActiveColor: Colors.blue,
+          iconTheme: darkTheme.iconTheme.copyWith(color: Colors.white),
+          floatingActionButtonTheme:
+              darkTheme.floatingActionButtonTheme.copyWith(
+            foregroundColor: Colors.white,
+          ),
+        ),
         initialRoute: TodoListPage.route,
         routes: {
           TodoListPage.route: (context) => const TodoListPage(),
