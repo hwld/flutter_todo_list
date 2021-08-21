@@ -38,11 +38,16 @@ class TodoListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addTodo(String title) async {
+  // removeのundoで使いたいため、すべてのフィールドを受け取れるようにする
+  Future<void> addTodo({
+    String? id,
+    required String title,
+    bool? isComplete,
+  }) async {
     final todo = TodoModel(
-      id: const Uuid().v4(),
+      id: id ?? const Uuid().v4(),
       title: title,
-      isComplete: false,
+      isComplete: isComplete ?? false,
     );
 
     await todoRepository.insertTodo(todo);

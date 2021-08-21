@@ -26,7 +26,9 @@ class _TodoEditorPageState extends State<TodoEditorPage> {
 
   Future<void> _handleAddTodo(BuildContext context) async {
     try {
-      await context.read<TodoListModel>().addTodo(titleController.text);
+      await context.read<TodoListModel>().addTodo(
+            title: titleController.text,
+          );
     } on DatabaseException {
       await showDialog<void>(
         context: context,

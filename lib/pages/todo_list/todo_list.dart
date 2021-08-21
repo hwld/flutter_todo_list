@@ -17,6 +17,33 @@ class TodoList extends StatelessWidget {
   final TodoFilter filter;
   final String searchText;
 
+  Future<void> _handleAddTodo(BuildContext context, TodoModel todo) async {
+    try {
+      await context.read<TodoListModel>().addTodo(
+            id: todo.id,
+            title: todo.title,
+            isComplete: todo.isComplete,
+          );
+    } on DatabaseException {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('エラー'),
+          content: const Text('データベースでエラーが発生しました。'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final listModel = context.watch<TodoListModel>();
@@ -50,7 +77,10 @@ class TodoList extends StatelessWidget {
       ),
       itemCount: todos.length,
       itemBuilder: (context, index) {
-        return _TodoItem(todo: todos[index]);
+        return _TodoItem(
+          todo: todos[index],
+          onUndoRemoval: (todo) => _handleAddTodo(context, todo),
+        );
       },
     );
   }
@@ -59,9 +89,11 @@ class TodoList extends StatelessWidget {
 class _TodoItem extends StatelessWidget {
   const _TodoItem({
     Key? key,
+    required this.onUndoRemoval,
     required this.todo,
   }) : super(key: key);
 
+  final void Function(TodoModel removed) onUndoRemoval;
   final TodoModel todo;
 
   Future<void> _handleUpdateTodo(BuildContext context, bool? isComplete) async {
@@ -144,27 +176,21 @@ class _TodoItem extends StatelessWidget {
           ),
         ),
       ),
-      confirmDismiss: (_) async {
-        final status = await ScaffoldMessenger.of(context)
-            .showSnackBar(
-              SnackBar(
-                content: const Text('Todoを削除しました'),
-                behavior: SnackBarBehavior.floating,
-                action: SnackBarAction(
-                  textColor: Colors.blue,
-                  label: 'もとに戻す',
-                  onPressed: () {},
-                ),
-              ),
-            )
-            .closed;
-        if (status == SnackBarClosedReason.action) {
-          return false;
-        }
-        return true;
-      },
-      onDismissed: (_) {
-        _handleRemoveTodo(context, todo.id);
+      onDismissed: (_) async {
+        await _handleRemoveTodo(context, todo.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Todoを削除しました'),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              textColor: Colors.blue,
+              label: 'もとに戻す',
+              onPressed: () async {
+                onUndoRemoval(todo);
+              },
+            ),
+          ),
+        );
       },
     );
   }
